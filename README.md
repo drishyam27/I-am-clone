@@ -1,50 +1,68 @@
-# Welcome to your Expo app 👋
+# 🌟 I Am Clone - Daily Affirmations App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A beautiful, cross-platform mobile application clone of the popular "I Am" daily affirmations app. This project was built as a submission for the **8x Engineer Mobile App Challenge**.
 
-## Get started
+The app focuses on delivering a premium user experience with smooth 60fps animations, intuitive gesture controls, and clean code architecture.
 
-1. Install dependencies
+## ✨ Core Features
 
+* **Swipeable Card Interface:** Full-screen, premium card UI for reading daily affirmations with smooth swipe gestures.
+* **Personalized Categories:** Filter affirmations based on specific topics (e.g., Growth, Resilience, Success).
+* **Favorites Collection:** Save your favorite affirmations to a dedicated local collection for easy reading later.
+* **Streak Tracker:** Built-in habit tracking that monitors consecutive days the app is opened.
+* **Daily Reminders:** Locally scheduled push notifications to deliver daily motivational quotes.
+
+## 🛠️ Tech Stack
+
+* **Framework:** React Native & [Expo](https://expo.dev/)
+* **UI & Animations:** `react-native-reanimated` & `react-native-gesture-handler`
+* **Storage:** `@react-native-async-storage/async-storage` (Favorites & Streaks)
+* **Notifications:** `expo-notifications`
+
+## 📁 Project Architecture
+
+The codebase strictly adheres to a clean, modular architecture:
+
+```text
+├── assets/                 # Fonts, icons, and static images
+├── src/
+│   ├── components/         # Reusable UI (AffirmationCard, CustomButtons)
+│   ├── data/               # Mock JSON data for categories and affirmations
+│   ├── navigation/         # Bottom Tab and Stack Navigators
+│   ├── screens/            # Main views (Home, Favorites, Settings)
+│   ├── theme/              # Centralized typography, colors, and spacing
+│   └── utils/              # Helper functions (notifications, streak logic)
+├── App.js                  # Main entry point
+└── package.json
+```
+
+## 🚀 Getting Started
+
+To run this project locally on your machine, follow these steps:
+
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) installed and the Expo Go app downloaded on your physical device (or an iOS/Android emulator set up on your machine).
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/drishyam27/I-am-clone.git](https://github.com/drishyam27/I-am-clone.git)
+   cd I-am-clone
+   ```
+
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. Start the app
-
+3. **Start the Expo development server:**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+4. **Run the app:**
+   Scan the QR code generated in your terminal using the Expo Go app on your phone, or press `i` to open in the iOS simulator or `a` for the Android emulator.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 🏆 Contest Details
+Submitted for the [8x Engineer](https://8xengineer.com/) "Build an I Am Clone" challenge.
