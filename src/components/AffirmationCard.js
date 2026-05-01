@@ -116,7 +116,8 @@ export default function AffirmationCard({ affirmation, onSwipeComplete, isNext, 
 const styles = StyleSheet.create({
   card: {
     position: 'absolute',
-    width: width * 0.85,
+    width: '90%',
+    maxWidth: 400,
     height: height * 0.65,
     backgroundColor: theme.colors.card,
     borderRadius: 24,
@@ -158,5 +159,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     textAlign: 'center',
     lineHeight: 44,
+    flexShrink: 1,
+    flexWrap: 'wrap',
   }
 });
