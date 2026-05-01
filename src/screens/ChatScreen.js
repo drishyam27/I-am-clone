@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { theme } from '../theme';
-import { generateAIResponse } from '../utils/mockAI';
+import { generateAIResponse } from '../utils/groqAI';
 
 const BG_IMAGE = { uri: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop' };
 
@@ -20,14 +20,18 @@ export default function ChatScreen() {
     if (!inputText.trim()) return;
 
     const userMsg = { id: Date.now().toString(), text: inputText.trim(), sender: 'user' };
-    setMessages(prev => [...prev, userMsg]);
+    
+    // Create the updated history array to pass to the AI
+    const updatedHistory = [...messages, userMsg];
+    
+    setMessages(updatedHistory);
     setInputText('');
     Keyboard.dismiss();
 
     setIsTyping(true);
     
-    // Simulate AI response
-    const aiResponseText = await generateAIResponse(userMsg.text);
+    // Call real Groq API with context
+    const aiResponseText = await generateAIResponse(updatedHistory);
     const aiMsg = { id: (Date.now() + 1).toString(), text: aiResponseText, sender: 'ai' };
     
     setMessages(prev => [...prev, aiMsg]);
