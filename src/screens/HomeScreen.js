@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSharedValue } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,7 +36,10 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>For You</Text>
+        <View style={styles.titleContainer}>
+          <Image source={require('../../assets/icon.png')} style={styles.headerLogo} />
+          <Text style={styles.headerTitle}>For You</Text>
+        </View>
         <View style={styles.streakBadge}>
           <Text style={styles.streakText}>{streak}</Text>
           <Ionicons name="flame" size={24} color={theme.colors.accent} style={styles.streakIcon} />
@@ -86,6 +89,16 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.large,
     fontWeight: theme.typography.weights.bold,
     letterSpacing: 1,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerLogo: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 10,
   },
   streakBadge: {
     flexDirection: 'row',
