@@ -95,3 +95,25 @@ export const updateStreak = async () => {
     return 0;
   }
 };
+
+// --- CATEGORIES ---
+
+const CATEGORIES_KEY = '@affirmations_categories';
+
+export const getCategories = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(CATEGORIES_KEY);
+    return jsonValue != null ? JSON.parse(jsonValue) : [];
+  } catch (e) {
+    console.error("Error fetching categories", e);
+    return [];
+  }
+};
+
+export const saveCategories = async (categories) => {
+  try {
+    await AsyncStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
+  } catch (e) {
+    console.error("Error saving categories", e);
+  }
+};

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, Image, ImageBackground, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,6 +17,8 @@ export default function HomeScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [streak, setStreak] = useState(0);
 
+  const [filteredAffirmations, setFilteredAffirmations] = useState(affirmationsData);
+
   const swipeTranslateX = useSharedValue(0);
   const mouseX = useSharedValue(0);
   const mouseY = useSharedValue(0);
@@ -28,8 +31,27 @@ export default function HomeScreen() {
     initStreak();
   }, []);
 
+  // Use useFocusEffect to reload categories when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadCategories = async () => {
+        const { getCategories } = await import('../utils/storage');
+        const savedCategories = await getCategories();
+        
+        if (savedCategories && savedCategories.length > 0) {
+          const filtered = affirmationsData.filter(item => savedCategories.includes(item.category));
+          setFilteredAffirmations(filtered.length > 0 ? filtered : affirmationsData);
+        } else {
+          setFilteredAffirmations(affirmationsData);
+        }
+        setCurrentIndex(0); // Reset index to prevent out-of-bounds errors
+      };
+      loadCategories();
+    }, [])
+  );
+
   const handleSwipeComplete = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % affirmationsData.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % filteredAffirmations.length);
     swipeTranslateX.value = 0;
   };
 
@@ -50,9 +72,9 @@ export default function HomeScreen() {
   });
 
   const isWeb = Platform.OS === 'web';
-  const currentAffirmation = affirmationsData[currentIndex];
-  const nextIndex = (currentIndex + 1) % affirmationsData.length;
-  const nextAffirmation = affirmationsData[nextIndex];
+  const currentAffirmation = filteredAffirmations[currentIndex] || filteredAffirmations[0];
+  const nextIndex = (currentIndex + 1) % filteredAffirmations.length;
+  const nextAffirmation = filteredAffirmations[nextIndex] || filteredAffirmations[0];
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }} onPointerMove={handlePointerMove}>

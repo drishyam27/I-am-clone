@@ -1,5 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Switch, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Switch, ImageBackground, TouchableOpacity, Platform, Alert } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { requestPermissionsAsync, scheduleDailyNotification, cancelAllNotifications } from '../utils/notifications';
+import { getRandomAffirmations } from '../data/affirmations';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,9 +12,11 @@ import { getStreak } from '../utils/storage';
 
 const BG_IMAGE = { uri: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop' };
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }) {
   const [streak, setStreak] = useState(0);
-  const [reminders, setReminders] = useState(true);
+  const [reminders, setReminders] = useState(false);
+  const [reminderTime, setReminderTime] = useState(new Date(new Date().setHours(9, 0, 0, 0)));
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [haptics, setHaptics] = useState(true);
   const [animations, setAnimations] = useState(true);
 
@@ -24,6 +29,44 @@ export default function SettingsScreen() {
       fetchStreak();
     }, [])
   );
+
+  const handleReminderToggle = async (value) => {
+    if (value) {
+      const hasPermission = await requestPermissionsAsync();
+      if (hasPermission) {
+        setReminders(true);
+        if (Platform.OS === 'android') {
+          setShowTimePicker(true);
+        } else {
+          // On iOS, schedule immediately for default time, user can change later
+          const randomAffirmation = getRandomAffirmations(1)[0];
+          await scheduleDailyNotification(reminderTime, randomAffirmation);
+        }
+      } else {
+        setReminders(false);
+        Alert.alert('Permission Denied', 'Please enable notifications in your system settings to use this feature.');
+      }
+    } else {
+      setReminders(false);
+      setShowTimePicker(false);
+      await cancelAllNotifications();
+    }
+  };
+
+  const handleTimeChange = async (event, selectedDate) => {
+    if (Platform.OS === 'android') {
+      setShowTimePicker(false);
+    }
+    
+    if (selectedDate) {
+      setReminderTime(selectedDate);
+      
+      if (event.type === 'set' || Platform.OS === 'ios') {
+        const randomAffirmation = getRandomAffirmations(1)[0];
+        await scheduleDailyNotification(selectedDate, randomAffirmation);
+      }
+    }
+  };
 
   return (
     <ImageBackground source={BG_IMAGE} style={styles.safeArea} resizeMode="cover">
@@ -54,8 +97,36 @@ export default function SettingsScreen() {
               <BlurView intensity={50} tint="dark" style={styles.preferencesCard}>
                 <View style={styles.settingRow}>
                   <Text style={styles.settingLabel}>Daily Reminders</Text>
-                  <Switch value={reminders} onValueChange={setReminders} trackColor={{ true: theme.colors.primary }} />
+                  <Switch value={reminders} onValueChange={handleReminderToggle} trackColor={{ true: theme.colors.primary }} />
                 </View>
+                
+                {reminders && (
+                  <>
+                    <View style={styles.settingDivider} />
+                    <View style={styles.settingRow}>
+                      <Text style={styles.settingLabel}>Reminder Time</Text>
+                      {Platform.OS === 'android' ? (
+                        <TouchableOpacity 
+                          style={styles.timeButton}
+                          onPress={() => setShowTimePicker(true)}
+                        >
+                          <Text style={styles.timeButtonText}>
+                            {reminderTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <DateTimePicker
+                          value={reminderTime}
+                          mode="time"
+                          display="default"
+                          onChange={handleTimeChange}
+                          themeVariant="dark"
+                          style={styles.datePickerIOS}
+                        />
+                      )}
+                  </>
+                )}
+                
                 <View style={styles.settingDivider} />
                 <View style={styles.settingRow}>
                   <Text style={styles.settingLabel}>Haptic Feedback</Text>
@@ -68,6 +139,29 @@ export default function SettingsScreen() {
                 </View>
               </BlurView>
             </View>
+
+            <View style={styles.statsContainer}>
+              <Text style={styles.sectionTitle}>Content</Text>
+              <BlurView intensity={50} tint="dark" style={styles.preferencesCard}>
+                <TouchableOpacity 
+                  style={styles.settingRow} 
+                  onPress={() => navigation.navigate('CategorySelection')}
+                >
+                  <Text style={styles.settingLabel}>Personalize Categories</Text>
+                  <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
+                </TouchableOpacity>
+              </BlurView>
+            </View>
+            
+            {Platform.OS === 'android' && showTimePicker && (
+              <DateTimePicker
+                value={reminderTime}
+                mode="time"
+                is24Hour={false}
+                display="default"
+                onChange={handleTimeChange}
+              />
+            )}
 
           </View>
         </SafeAreaView>
@@ -168,5 +262,19 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: theme.typography.weights.bold,
     marginRight: 8,
+  },
+  timeButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: 8,
+  },
+  timeButtonText: {
+    color: theme.colors.text,
+    fontSize: theme.typography.sizes.medium,
+    fontWeight: theme.typography.weights.medium,
+  },
+  datePickerIOS: {
+    width: 90,
   }
 });
