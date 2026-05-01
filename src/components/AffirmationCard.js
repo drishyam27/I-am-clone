@@ -3,6 +3,8 @@ import { StyleSheet, Dimensions, Text, View, TouchableOpacity } from 'react-nati
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS, interpolate, Extrapolation } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 import { theme } from '../theme';
 import { checkIsFavorite, toggleFavorite } from '../utils/storage';
 
@@ -23,6 +25,9 @@ export default function AffirmationCard({ affirmation, onSwipeComplete, isNext, 
   }, [affirmation.id]);
 
   const handleFavoritePress = async () => {
+    // Fire light haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
     // Optimistic UI update
     setIsFavorited(!isFavorited);
     const newStatus = await toggleFavorite(affirmation);
@@ -81,7 +86,8 @@ export default function AffirmationCard({ affirmation, onSwipeComplete, isNext, 
   });
 
   const CardContent = (
-    <Animated.View style={[styles.card, animatedStyle]}>
+    <Animated.View style={[styles.card, animatedStyle, { overflow: 'hidden' }]}>
+      <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
       <View style={styles.categoryBadge}>
         <Text style={styles.categoryText}>{affirmation.category}</Text>
       </View>

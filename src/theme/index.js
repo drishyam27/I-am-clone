@@ -1,16 +1,16 @@
 export const colors = {
-  background: '#1A1A1A',
-  card: '#2D2D2D',
+  background: '#0B1319', // Dark teal-tinted background
+  card: 'rgba(20, 30, 40, 0.4)', // Transparent for glassmorphism
   text: '#FFFFFF',
-  textSecondary: '#A0A0A0',
-  primary: '#8A2BE2', // Deep purple
-  accent: '#FFD700', // Gold
+  textSecondary: '#B0C4DE',
+  primary: '#188B8D', // Teal
+  accent: '#D4AF37', // Gold
   favorite: '#FF4500', // Orange red
-  border: '#3D3D3D',
+  border: 'rgba(255, 255, 255, 0.2)',
 };
 
 export const typography = {
-  fontFamily: 'System', // We can update this to a custom font later
+  fontFamily: 'Outfit_400Regular',
   sizes: {
     small: 14,
     medium: 18,

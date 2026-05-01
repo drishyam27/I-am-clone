@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Image } from 'react-native';
+import { View, StyleSheet, Text, Image, ImageBackground } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSharedValue } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { affirmationsData } from '../data/affirmations';
 import AffirmationCard from '../components/AffirmationCard';
 import { theme } from '../theme';
 import { updateStreak } from '../utils/storage';
+
+const BG_IMAGE = { uri: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop' };
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -34,40 +37,45 @@ export default function HomeScreen() {
   const nextAffirmation = affirmationsData[nextIndex];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <Image source={require('../../assets/icon.png')} style={styles.headerLogo} />
-          <Text style={styles.headerTitle}>For You</Text>
+    <ImageBackground source={BG_IMAGE} style={styles.container} resizeMode="cover">
+      <LinearGradient
+        colors={['rgba(11, 19, 25, 0.4)', 'rgba(11, 19, 25, 0.95)']}
+        style={[styles.gradientOverlay, { paddingTop: insets.top }]}
+      >
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <Image source={require('../../assets/icon.png')} style={styles.headerLogo} />
+            <Text style={styles.headerTitle}>For You</Text>
+          </View>
+          <View style={styles.streakBadge}>
+            <Text style={styles.streakText}>{streak}</Text>
+            <Ionicons name="flame" size={24} color={theme.colors.accent} style={styles.streakIcon} />
+          </View>
         </View>
-        <View style={styles.streakBadge}>
-          <Text style={styles.streakText}>{streak}</Text>
-          <Ionicons name="flame" size={24} color={theme.colors.accent} style={styles.streakIcon} />
-        </View>
-      </View>
-      
-      <View style={styles.cardContainer}>
-        {/* Next Card (rendered behind) */}
-        <View style={styles.cardWrapper}>
-          <AffirmationCard 
-            affirmation={nextAffirmation} 
-            isNext={true} 
-            swipeTranslateX={swipeTranslateX}
-          />
-        </View>
+        
+        <View style={styles.cardContainer}>
+          {/* Next Card (rendered behind) */}
+          <View style={styles.cardWrapper}>
+            <AffirmationCard 
+              affirmation={nextAffirmation} 
+              isNext={true} 
+              swipeTranslateX={swipeTranslateX}
+            />
+          </View>
 
-        {/* Current Card (rendered on top, interactive) */}
-        <View style={styles.cardWrapper}>
-          <AffirmationCard 
-            key={currentAffirmation.id} 
-            affirmation={currentAffirmation} 
-            onSwipeComplete={handleSwipeComplete} 
-            isNext={false}
-            swipeTranslateX={swipeTranslateX}
-          />
+          {/* Current Card (rendered on top, interactive) */}
+          <View style={styles.cardWrapper}>
+            <AffirmationCard 
+              key={currentAffirmation.id} 
+              affirmation={currentAffirmation} 
+              onSwipeComplete={handleSwipeComplete} 
+              isNext={false}
+              swipeTranslateX={swipeTranslateX}
+            />
+          </View>
         </View>
-      </View>
-    </View>
+      </LinearGradient>
+    </ImageBackground>
   );
 }
 
@@ -75,6 +83,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  gradientOverlay: {
+    flex: 1,
   },
   header: {
     paddingHorizontal: theme.spacing.lg,
