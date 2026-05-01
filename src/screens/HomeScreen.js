@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, Image, ImageBackground, Platform, Modal, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, Image, ImageBackground, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import { affirmationsData } from '../data/affirmations';
 import AffirmationCard from '../components/AffirmationCard';
 import { theme } from '../theme';
@@ -16,7 +15,6 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [aiModalVisible, setAiModalVisible] = useState(false);
 
   const swipeTranslateX = useSharedValue(0);
   const mouseX = useSharedValue(0);
@@ -86,24 +84,6 @@ export default function HomeScreen() {
               <AffirmationCard key={currentAffirmation.id} affirmation={currentAffirmation} onSwipeComplete={handleSwipeComplete} isNext={false} swipeTranslateX={swipeTranslateX} />
             </View>
           </View>
-
-          <TouchableOpacity style={styles.fab} onPress={() => setAiModalVisible(true)}>
-            <BlurView intensity={80} tint="dark" style={styles.fabBlur}>
-              <Text style={styles.fabText}>✨ AI Companion</Text>
-            </BlurView>
-          </TouchableOpacity>
-
-          <Modal visible={aiModalVisible} transparent animationType="fade">
-            <BlurView intensity={80} tint="dark" style={styles.modalOverlay}>
-              <View style={styles.modalCard}>
-                <Text style={styles.modalTitle}>✨ Your AI Guide</Text>
-                <Text style={styles.modalMessage}>"You are entirely up to you. Every step you take today is a beautiful investment in your future. Keep shining, because the world needs your unique light."</Text>
-                <TouchableOpacity style={styles.closeButton} onPress={() => setAiModalVisible(false)}>
-                  <Text style={styles.closeButtonText}>Thank You</Text>
-                </TouchableOpacity>
-              </View>
-            </BlurView>
-          </Modal>
 
         </LinearGradient>
       </ImageBackground>
@@ -183,65 +163,5 @@ const styles = StyleSheet.create({
     opacity: 0.15,
     filter: 'blur(100px)',
     zIndex: 0,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: theme.spacing.xl,
-    right: theme.spacing.lg,
-    borderRadius: 30,
-    overflow: 'hidden',
-    zIndex: 100,
-    elevation: 5,
-  },
-  fabBlur: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
-    backgroundColor: 'rgba(24, 139, 141, 0.2)', // Teal tint
-  },
-  fabText: {
-    color: theme.colors.text,
-    fontSize: theme.typography.sizes.medium,
-    fontWeight: theme.typography.weights.bold,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.spacing.xl,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 400,
-    backgroundColor: 'rgba(20, 30, 40, 0.6)',
-    borderRadius: 24,
-    padding: theme.spacing.xl,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    color: theme.colors.accent,
-    fontSize: theme.typography.sizes.large,
-    fontWeight: theme.typography.weights.bold,
-    marginBottom: theme.spacing.md,
-  },
-  modalMessage: {
-    color: theme.colors.text,
-    fontSize: theme.typography.sizes.medium,
-    lineHeight: 28,
-    textAlign: 'center',
-    fontStyle: 'italic',
-    marginBottom: theme.spacing.xl,
-  },
-  closeButton: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: theme.spacing.xl,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: 20,
-  },
-  closeButtonText: {
-    color: '#FFF',
-    fontSize: theme.typography.sizes.medium,
-    fontWeight: theme.typography.weights.bold,
   }
 });
