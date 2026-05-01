@@ -28,11 +28,15 @@ export default function TabNavigator() {
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: theme.colors.card,
-          borderTopColor: theme.colors.border,
+          backgroundColor: '#0A0A0A',
+          borderTopColor: 'rgba(255, 255, 255, 0.05)',
+          elevation: 0, // Android shadow
+          shadowOpacity: 0, // iOS shadow
         },
         headerStyle: {
-          backgroundColor: theme.colors.background,
+          backgroundColor: '#0A0A0A',
+          elevation: 0,
+          shadowOpacity: 0,
         },
         headerTintColor: theme.colors.text,
       })}
