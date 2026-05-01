@@ -1,52 +1,78 @@
-import React from 'react';
-import { StyleSheet, Dimensions, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Dimensions, Text, View, TouchableOpacity } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS, interpolate, Extrapolation } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../theme';
+import { checkIsFavorite, toggleFavorite } from '../utils/storage';
 
 const { width, height } = Dimensions.get('window');
 
-export default function AffirmationCard({ affirmation, onSwipeComplete, isNext }) {
-  const translateX = useSharedValue(0);
+export default function AffirmationCard({ affirmation, onSwipeComplete, isNext, swipeTranslateX }) {
   const translateY = useSharedValue(0);
+  const [isFavorited, setIsFavorited] = useState(false);
 
-  // DECISION: Using PanGesture from react-native-gesture-handler for 60fps native-driven interactions.
-  // runOnJS is used to call the React state setter on the JS thread after the animation completes.
+  useEffect(() => {
+    let isMounted = true;
+    const checkFav = async () => {
+      const status = await checkIsFavorite(affirmation.id);
+      if (isMounted) setIsFavorited(status);
+    };
+    checkFav();
+    return () => { isMounted = false; };
+  }, [affirmation.id]);
+
+  const handleFavoritePress = async () => {
+    // Optimistic UI update
+    setIsFavorited(!isFavorited);
+    const newStatus = await toggleFavorite(affirmation);
+    setIsFavorited(newStatus); // Sync with actual storage result
+  };
+
   const panGesture = Gesture.Pan()
     .onUpdate((event) => {
-      translateX.value = event.translationX;
+      if (swipeTranslateX) {
+        swipeTranslateX.value = event.translationX;
+      }
       translateY.value = event.translationY;
     })
     .onEnd((event) => {
-      const swipeThreshold = width * 0.3; // 30% of screen width to trigger swipe
+      const swipeThreshold = width * 0.3; 
       if (Math.abs(event.translationX) > swipeThreshold) {
-        // Swipe off screen
-        translateX.value = withTiming(Math.sign(event.translationX) * width * 1.5, { duration: 250 }, () => {
-          if (onSwipeComplete) {
-            runOnJS(onSwipeComplete)();
-          }
-        });
+        const direction = Math.sign(event.translationX);
+        if (swipeTranslateX) {
+          swipeTranslateX.value = withTiming(direction * width * 1.5, { duration: 250 }, () => {
+            if (onSwipeComplete) {
+              runOnJS(onSwipeComplete)();
+            }
+          });
+        }
       } else {
-        // Snap back to center
-        translateX.value = withSpring(0);
+        if (swipeTranslateX) {
+          swipeTranslateX.value = withSpring(0);
+        }
         translateY.value = withSpring(0);
       }
     });
 
   const animatedStyle = useAnimatedStyle(() => {
     if (isNext) {
-      // DECISION: The background card is scaled down and slightly transparent to create depth.
+      const safeTranslateX = swipeTranslateX ? swipeTranslateX.value : 0;
+      const scale = interpolate(Math.abs(safeTranslateX), [0, width * 0.8], [0.9, 1], Extrapolation.CLAMP);
+      const opacity = interpolate(Math.abs(safeTranslateX), [0, width * 0.8], [0.6, 1], Extrapolation.CLAMP);
+
       return {
-        transform: [{ scale: 0.95 }],
-        opacity: 0.6,
+        transform: [{ scale }],
+        opacity,
       };
     }
 
-    // Foreground card rotates slightly as it is dragged for a natural feel.
-    const rotate = `${(translateX.value / width) * 10}deg`;
+    const safeTranslateX = swipeTranslateX ? swipeTranslateX.value : 0;
+    const rotate = `${(safeTranslateX / width) * 10}deg`;
+    
     return {
       transform: [
-        { translateX: translateX.value },
+        { translateX: safeTranslateX },
         { translateY: translateY.value },
         { rotate: rotate }
       ],
@@ -59,12 +85,25 @@ export default function AffirmationCard({ affirmation, onSwipeComplete, isNext }
       <View style={styles.categoryBadge}>
         <Text style={styles.categoryText}>{affirmation.category}</Text>
       </View>
+
+      <TouchableOpacity 
+        style={styles.favoriteButton} 
+        onPress={handleFavoritePress}
+        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+      >
+        <Ionicons 
+          name={isFavorited ? "heart" : "heart-outline"} 
+          size={32} 
+          color={isFavorited ? theme.colors.favorite : theme.colors.textSecondary} 
+        />
+      </TouchableOpacity>
+
       <Text style={styles.text}>{affirmation.text}</Text>
     </Animated.View>
   );
 
   if (isNext) {
-    return CardContent; // No gestures for background card
+    return CardContent;
   }
 
   return (
@@ -95,6 +134,7 @@ const styles = StyleSheet.create({
   categoryBadge: {
     position: 'absolute',
     top: theme.spacing.lg,
+    left: theme.spacing.lg,
     backgroundColor: theme.colors.primary,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.xs,
@@ -106,11 +146,17 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     textTransform: 'uppercase',
   },
+  favoriteButton: {
+    position: 'absolute',
+    top: theme.spacing.lg,
+    right: theme.spacing.lg,
+    zIndex: 20,
+  },
   text: {
     color: theme.colors.text,
-    fontSize: theme.typography.sizes.large,
+    fontSize: theme.typography.sizes.xlarge,
     fontWeight: theme.typography.weights.bold,
     textAlign: 'center',
-    lineHeight: 36,
+    lineHeight: 44,
   }
 });
